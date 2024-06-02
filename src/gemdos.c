@@ -39,7 +39,7 @@ const char Gemdos_fileid[] = "Hatari gemdos.c : " __DATE__ " " __TIME__;
 #include <psp2/types.h>
 #include <psp2/io/dirent.h>
 #include <psp2/kernel/threadmgr.h>
-#else
+#elif !defined(GEKKO)
 #include <utime.h>
 #define HAVE_UTIME
 #endif
@@ -528,6 +528,20 @@ void GemDOS_Reset(void)
 	Symbols_RemoveCurrentProgram();
 	pDTA = NULL;
 }
+
+#if defined(GEKKO)
+static int wii_access( const char *pathname, int mode)
+{
+	struct stat st;
+	
+	if ( stat(pathname,&st) < 0 )
+		return -1;
+	
+	return 0; //With Wii the file/directory is considered always accessible if it exists
+}
+
+#define access wii_access
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**

@@ -77,7 +77,15 @@ else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
    fpic := -fPIC
    SHARED := -dynamiclib
-   PLATFLAGS := -DLSB_FIRST -DALIGN_DWORD
+   PLATFLAGS := -DLSB_FIRST -DALIGN_DWORD -DHAVE_POSIX_MEMALIGN=1
+
+   ifeq ($(CROSS_COMPILE),1)
+		TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
+		CFLAGS   += $(TARGET_RULE)
+		CPPFLAGS += $(TARGET_RULE)
+		CXXFLAGS += $(TARGET_RULE)
+		LDFLAGS  += $(TARGET_RULE)
+   endif
 
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
@@ -134,15 +142,17 @@ else ifeq ($(platform), tvos-arm64)
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
 	endif
+	CC = clang -arch arm64 -isysroot $(IOSSDK)
+	CXX = clang++ -arch arm64 -isysroot $(IOSSDK)
 	CFLAGS += -DIOS -marm -DHAVE_POSIX_MEMALIGN=1 -w
 
 else ifeq ($(platform), wii)
-	TARGET := $(TARGET_NAME)_libretro_wii.a
+   TARGET := $(TARGET_NAME)_libretro_wii.a
    CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
    CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
    AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)   
    CFLAGS += -DSDL_BYTEORDER=SDL_BIG_ENDIAN -DMSB_FIRST -DBYTE_ORDER=BIG_ENDIAN  -DBYTE_ORDER=BIG_ENDIAN \
-	-DHAVE_MEMALIGN -DHAVE_ASPRINTF -I$(ZLIB_DIR) -I$(DEVKITPRO)/libogc/include \
+	-D_FILE_OFFSET_BITS=64 -DHAVE_MEMALIGN -DHAVE_ASPRINTF -I$(ZLIB_DIR) -I$(DEVKITPRO)/libogc/include \
 	-D__powerpc__ -D__POWERPC__ -DGEKKO -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__
    SHARED :=   -lm -lpthread -lc
    PLATFLAGS :=  -DALIGN_DWORD
@@ -161,7 +171,7 @@ else ifeq ($(platform), wiiu)
    PLATFORM_DEFINES += -DWIIU -DHW_RVL -DWORDS_BIGENDIAN=1 -Dpowerpc -D__POWERPC__ -D__ppc__ 
    STATIC_LINKING=1
    STATIC_LINKING_LINK = 1
-   CFLAGS +=  -DALIGN_DWORD $(PLATFORM_DEFINES) -I$(ZLIB_DIR) 
+   CFLAGS +=  -DALIGN_DWORD -D_FILE_OFFSET_BITS=64 $(PLATFORM_DEFINES) -I$(ZLIB_DIR)
 
 # Lightweight PS3 Homebrew SDK
 else ifneq (,$(filter $(platform), ps3 psl1ght))
@@ -191,6 +201,7 @@ else ifeq ($(platform), vita)
 	STATIC_LINKING_LINK=1
 else
    PLATFLAGS :=  -DLSB_FIRST -DALIGN_DWORD -DWIN32PORT -DWIN32
+   CFLAGS += -D_FILE_OFFSET_BITS=64
 	TARGET := $(TARGET_NAME)_libretro.dll
    SHARED := -shared -static-libgcc -s -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined 
 	EXTERNAL_ZLIB = 1
