@@ -145,7 +145,8 @@ else ifeq ($(platform), tvos-arm64)
 	CC = clang -arch arm64 -isysroot $(IOSSDK)
 	CXX = clang++ -arch arm64 -isysroot $(IOSSDK)
 	CFLAGS += -DIOS -marm -DHAVE_POSIX_MEMALIGN=1 -w
-
+	
+# Nintendo Wii
 else ifeq ($(platform), wii)
    TARGET := $(TARGET_NAME)_libretro_wii.a
    CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
@@ -159,7 +160,8 @@ else ifeq ($(platform), wii)
    EXTERNAL_ZLIB = 1
 	STATIC_LINKING=1
 	STATIC_LINKING_LINK=1
-# Nintendo Game Cube / Wii / WiiU
+	
+# Nintendo WiiU
 else ifeq ($(platform), wiiu)
    TARGET := $(TARGET_NAME)_libretro_$(platform).a
    CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
@@ -167,8 +169,9 @@ else ifeq ($(platform), wiiu)
    AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)  
    PLATFORM_DEFINES += -DSDL_BYTEORDER=SDL_BIG_ENDIAN -DMSB_FIRST -DBYTE_ORDER=BIG_ENDIAN  -DBYTE_ORDER=BIG_ENDIAN 
    PLATFORM_DEFINES += -DGEKKO -mcpu=750 -meabi -mhard-float -DHAVE_STRTOF_L -DHAVE_LOCALE
-   PLATFORM_DEFINES += -ffunction-sections -fdata-sections -D__wiiu__ -D__wut__ -D_GNU_SOURCE
-   PLATFORM_DEFINES += -DWIIU -DHW_RVL -DWORDS_BIGENDIAN=1 -Dpowerpc -D__POWERPC__ -D__ppc__ 
+   PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -D_GNU_SOURCE
+   PLATFORM_DEFINES += -DWIIU -DHW_RVL -DWORDS_BIGENDIAN=1 -Dpowerpc -D__POWERPC__ -D__ppc__
+   PLATFORM_DEFINES += -D__wiiu__ -D__wut__ -ffunction-sections -fdata-sections
    STATIC_LINKING=1
    STATIC_LINKING_LINK = 1
    CFLAGS +=  -DALIGN_DWORD -D_FILE_OFFSET_BITS=64 $(PLATFORM_DEFINES) -I$(ZLIB_DIR)
