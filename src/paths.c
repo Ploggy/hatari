@@ -207,8 +207,8 @@ static void Paths_InitHomeDirs(void)
 {
 	char *psHome;
 #ifdef WIIU
-	strcpy(sUserHomeDir, "sd:/retroarch/cores/system");
-	strcpy(sHatariHomeDir, "sd:/retroarch/cores/system/hatari");
+	strcpy(sUserHomeDir, "fs:/vol/external01/retroarch/cores/system");
+	strcpy(sHatariHomeDir, "fs:/vol/external01/retroarch/cores/system/hatari");
 	if (!File_DirExists(sHatariHomeDir))
 	{
 		if (mkdir(sHatariHomeDir, 0755) != 0)
